@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'java-library'
+    id 'com.github.ben-manes.versions' version '0.51.0'
+    id 'org.javacc.javacc' version '3.0.3'
+}
+
+group = 'io.github.igrqb'
+version = '2.5.0-0f681b7-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.guava:guava:33.4.0-jre'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'io.netty:netty:3.10.6.Final'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'org.apache.commons:commons-jexl:2.1.1'
+    implementation 'org.jgrapht:jgrapht-core:1.5.2'
+    implementation 'com.esotericsoftware:kryo:5.6.2'
+    implementation 'com.stumbleupon:async:1.4.1'
+    implementation 'org.hbase:asynchbase:1.8.2'
+    implementation 'ch.qos.logback:logback-classic:1.5.15'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+    compileOnly 'org.gwtproject:gwt-user:2.12.1'
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+javacc {
+    dependentSourceSets = [sourceSets.main]
+}
+
+compileJavacc {
+    inputDirectory = file('src/main/java/net/opentsdb')
+    outputDirectory = file('src/main/java/net/opentsdb/query/expression/parser')
+}
+
+task generateBuildData(type: Exec) {
+    doFirst {
+        println('Generating BuildData')
+    }
+    commandLine 'gen_build_data.sh', 'src/main/java/net/opentsdb/tools/BuildData.java', 'net.opentsdb.tools'
+    doLast {
+        println('Generated BuildData')
+    }
+}
