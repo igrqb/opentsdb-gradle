@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.stumbleupon.async.Deferred;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -475,7 +475,7 @@ public abstract class AbstractHttpQuery {
   
   /** @return Information about the query */
   public String toString() {
-    return Objects.toStringHelper(this)
+    return MoreObjects.toStringHelper(this)
         .add("start_time", start_time)
         .add("request", request)
         .add("chan", chan)

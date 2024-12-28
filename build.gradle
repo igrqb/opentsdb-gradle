@@ -59,6 +59,6 @@ tasks.register('generateBuildData', Exec) {
     }
 }
 
-compileJava {
-    dependsOn tasks.named('generateBuildData')
-}
+//compileJava {
+//    dependsOn tasks.named('generateBuildData')
+//}

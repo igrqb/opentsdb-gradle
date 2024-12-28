@@ -28,9 +28,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferOutputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -288,7 +287,7 @@ public class QueryExecutor {
         }
 
         // handle nested expressions
-        final DirectedAcyclicGraph<String, DefaultEdge> graph = 
+        final DirectedAcyclicGraph<String, DefaultEdge> graph =
             new DirectedAcyclicGraph<String, DefaultEdge>(DefaultEdge.class);
 
         if (expressions != null) {
@@ -353,8 +352,8 @@ public class QueryExecutor {
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Added Edge " + eii.getKey() + " - " + var);
                   }
-                  graph.addDagEdge(eii.getKey(), var);
-                } catch (CycleFoundException cfe) {
+                  graph.addEdge(eii.getKey(), var);
+                } catch (Exception cfe) {
                   throw new IllegalArgumentException("Circular reference found: " +
                           eii.getKey(), cfe);
                 }
