@@ -47,12 +47,18 @@ compileJavacc {
     outputDirectory = file('src/main/java/net/opentsdb/query/expression/parser')
 }
 
-task generateBuildData(type: Exec) {
+tasks.register('generateBuildData', Exec) {
     doFirst {
         println('Generating BuildData')
+        println("Project dir: ${projectDir.absolutePath}")
     }
-    commandLine 'gen_build_data.sh', 'src/main/java/net/opentsdb/tools/BuildData.java', 'net.opentsdb.tools'
+    workingDir projectDir.absolutePath
+    commandLine './gen_build_data.sh', 'src/main/java/net/opentsdb/tools/BuildData.java', 'net.opentsdb.tools'
     doLast {
         println('Generated BuildData')
     }
+}
+
+compileJava {
+    dependsOn tasks.named('generateBuildData')
 }
