@@ -13,6 +13,7 @@
 package net.opentsdb.uid;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,7 +71,7 @@ public final class UniqueId implements UniqueIdInterface {
   }
   
   /** Charset used to convert Strings to byte arrays and back. */
-  private static final Charset CHARSET = Charset.forName("ISO-8859-1");
+  private static final Charset CHARSET = StandardCharsets.ISO_8859_1;
   /** The single column family used by this class. */
   private static final byte[] ID_FAMILY = toBytes("id");
   /** The single column family used by this class. */
@@ -258,7 +259,7 @@ public final class UniqueId implements UniqueIdInterface {
    * may be dropped due to race conditions at rollover.
    */
   private void incrementCacheHits() {
-    if (cache_hits >= Long.MAX_VALUE) {
+    if (cache_hits == Long.MAX_VALUE) {
       cache_hits = 1;
     } else {
       cache_hits++;
@@ -270,7 +271,7 @@ public final class UniqueId implements UniqueIdInterface {
    * may be dropped due to race conditions at rollover.
    */
   private void incrementCacheMiss() {
-    if (cache_misses >= Long.MAX_VALUE) {
+    if (cache_misses == Long.MAX_VALUE) {
       cache_misses = 1;
     } else {
       cache_misses++;
@@ -1370,8 +1371,7 @@ public final class UniqueId implements UniqueIdInterface {
         return;
       } catch (HBaseException e) {
         if (attempts > 0) {
-          LOG.error("Put failed, attempts left=" + attempts
-                    + " (retrying in " + wait + " ms), put=" + put, e);
+          LOG.error("Put failed, attempts left={} (retrying in {} ms), put={}", attempts, wait, put, e);
           try {
             Thread.sleep(wait);
           } catch (InterruptedException ie) {
@@ -1382,7 +1382,7 @@ public final class UniqueId implements UniqueIdInterface {
           throw e;
         }
       } catch (Exception e) {
-        LOG.error("WTF?  Unexpected exception type, put=" + put, e);
+        LOG.error("WTF?  Unexpected exception type, put={}", put, e);
       }
     }
     throw new IllegalStateException("This code should never be reached!");
@@ -1396,7 +1396,7 @@ public final class UniqueId implements UniqueIdInterface {
     return new String(b, CHARSET);
   }
 
-  /** Returns a human readable string representation of the object. */
+  /** Returns a human-readable string representation of the object. */
   public String toString() {
     return "UniqueId(" + fromBytes(table) + ", " + kind() + ", " + id_width + ")";
   }
@@ -1518,12 +1518,12 @@ public final class UniqueId implements UniqueIdInterface {
    * @since 2.0
    */
   public static UniqueIdType stringToUniqueIdType(final String type) {
-    if (type.toLowerCase().equals("metric") || 
-        type.toLowerCase().equals("metrics")) {
+    if (type.equalsIgnoreCase("metric") ||
+        type.equalsIgnoreCase("metrics")) {
       return UniqueIdType.METRIC;
-    } else if (type.toLowerCase().equals("tagk")) {
+    } else if (type.equalsIgnoreCase("tagk")) {
       return UniqueIdType.TAGK;
-    } else if (type.toLowerCase().equals("tagv")) {
+    } else if (type.equalsIgnoreCase("tagv")) {
       return UniqueIdType.TAGV;
     } else {
       throw new IllegalArgumentException("Invalid type requested: " + type);
@@ -1550,17 +1550,17 @@ public final class UniqueId implements UniqueIdInterface {
     if (uid == null || uid.isEmpty()) {
       throw new IllegalArgumentException("UID was empty");
     }
-    String id = uid;
+    StringBuilder id = new StringBuilder(uid);
     if (uid_length > 0) {
       while (id.length() < uid_length * 2) {
-        id = "0" + id;
+        id.insert(0, "0");
       }
     } else {
       if (id.length() % 2 > 0) {
-        id = "0" + id;
+        id.insert(0, "0");
       }
     }
-    return DatatypeConverter.parseHexBinary(id);
+    return DatatypeConverter.parseHexBinary(id.toString());
   }
 
   /**
@@ -1746,7 +1746,7 @@ public final class UniqueId implements UniqueIdInterface {
   }
 
   /**
-   * Pre-load UID caches, scanning up to "tsd.core.preload_uid_cache.max_entries"
+   * Preload UID caches, scanning up to "tsd.core.preload_uid_cache.max_entries"
    * rows from the UID table.
    * @param tsdb The TSDB to use 
    * @param uid_cache_map A map of {@link UniqueId} objects keyed on the kind.
